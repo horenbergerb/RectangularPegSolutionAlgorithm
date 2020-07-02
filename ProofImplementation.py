@@ -155,7 +155,7 @@ M_intersection = copy.deepcopy(M[min_val_loc[0][0]][min_val_loc[1][0]])
 M_solutions = np.array([M_intersection[0]+M_intersection[1], M_intersection[0]-M_intersection[1], M_intersection[0]+add_phi(M_intersection[1], phi), M_intersection[0]-add_phi(M_intersection[1], phi)])
 print("Estimated intersection of M and M_phi: {}+{}i and {}+{}i".format(*np.concatenate((M_intersection[0], M_intersection[1]))))
 print("Rectangle vertices from from M intersection")
-print("   {}\n   {}\n   {}\n   {}\m".format(*M_solutions))
+print("   {}\n   {}\n   {}\n   {}".format(*M_solutions))
 
 #Solving the L and L_phi approach for posterity
 print("Finding intersection point between L and L_phi points...")
@@ -172,7 +172,7 @@ L_intersection = copy.deepcopy(L[min_val_loc[0][0]][min_val_loc[1][0]])
 L_solutions = np.array([L_intersection[0]+L_intersection[1], L_intersection[0]-L_intersection[1], L_intersection[0]+add_phi(L_intersection[1], phi), L_intersection[0]-add_phi(L_intersection[1], phi)])
 print("Estimated intersection of L and L_phi: {}+{}i and {}+{}i".format(*np.concatenate((L_intersection[0], L_intersection[1]))))
 print("Rectangle vertices from from L intersection")
-print("   {}\n   {}\n   {}\n   {}\m".format(*L_solutions))
+print("   {}\n   {}\n   {}\n   {}".format(*L_solutions))
 
 
 ##########################
