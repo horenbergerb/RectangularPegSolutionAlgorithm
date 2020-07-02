@@ -13,16 +13,26 @@ from scipy import constants
 #https://arxiv.org/pdf/2005.09193.pdf
 #It's a pretty exciting proof, so I thought I might try to visualize what's going on
 
+pi = constants.pi
+
 #The interval between samples on our curve
-#I recommend only changing the denominator
-precision = (2.0*constants.pi)/40
+curve_intervals = 1.012e-1
+
+#margin for checking whether solutions are on lambdaX{0}
+#can sometimes be tweaked to fix results instead of curve_interval
+#better to have this small, but you'll also need small curve_interval
+rtol = 1e-5
+atol = 8e-2
 
 #picking a phi
-phi = 3.14159/2.0
+phi = pi/3.0
 
 #Creating data for a simple circle (Jordan curve) to try and algorithmically solve for a rectangle inscription
 def curve_data():
-    curve = np.array([np.array([3*np.sin(i),np.cos(i)]) for i in np.arange(-3.14159,3.14159, precision)])
+    #An assortment of sample curves
+    #curve = np.array([np.array([np.sin(i),np.cos(i)]) for i in np.arange(0.0,2.0*pi, curve_precision)])
+    curve = np.array([np.array([3.0*np.sin(i),np.cos(i)]) for i in np.arange(0.0,2.0*pi, curve_intervals)])
+    #curve = np.array([np.array([np.real((np.sin(2.0*i)+2.0)*np.exp(i*1j)),np.imag((np.sin(2.0*i)+2.0)*np.exp(i*1j))]) for i in np.arange(-0.0,2.0*pi, curve_precision)])
     return curve
 
 #Coordinate conversion functions which take [x,y] and [mag,angle]
@@ -40,7 +50,7 @@ def add_phi(data, phi):
     data = to_cartesian(data)
     return data
 
-print("Hello! Default Jordan curve is a circle, and phi is set in the code to {}".format(phi))
+print("Hello! The Jordan curve is chosen in the curve_data function, and phi is set in the code to {}".format(phi))
 print("We're going to solve the points on the curve with the diagonal of angle phi")
 
 #Jordan curve data
@@ -71,9 +81,6 @@ print("Preparing lambdaXlambda...")
 lambda_cross_lambda = np.zeros((data.shape[0], data.shape[0], 2,2))
 for cur1 in range(0, data.shape[0]):
     for cur2 in range(0, data.shape[0]):
-        #print(L[cur1][cur2])
-        #print(data[cur1])
-        #print(l(data[cur1],data[cur2]))
         lambda_cross_lambda[cur1][cur2] = np.array([copy.deepcopy(data[cur1]),copy.deepcopy(data[cur2])])
 
 print("Preparing L...")
@@ -122,30 +129,36 @@ def find_intersection_point(set1, set2):
     #tensor set1 and set2 but with scalar norms instead of 2 complex values as entries
     distances = np.zeros((set1.shape[0], set1.shape[1], set2.shape[0], set2.shape[1]))
     print("   Finding distances between all points")
+    #preemptively finding points in set1 and set2 which are on lambda and zero:
     #finding all the distances between points on M and points on M_phi
+    set1_on_lambda = np.array([[0]*data.shape[0]]*data.shape[0])
+    set1_on_zero = np.array([[0]*data.shape[0]]*data.shape[0])
+    set2_on_lambda = np.array([[0]*data.shape[0]]*data.shape[0])
+    set2_on_zero = np.array([[0]*data.shape[0]]*data.shape[0])
+    for val1 in range(0, data.shape[0]):
+        for val2 in range(0, data.shape[0]):
+            #checking if our terms are lambda (to avoid lambdaX{0})
+            for x in data:
+                if np.isclose(np.linalg.norm(x-set1[val1][val2][0]),0.0, rtol=rtol, atol=atol):
+                    set1_on_lambda[val1][val2] = 1
+                if np.isclose(np.linalg.norm(x-set2[val1][val2][0]),0.0, rtol=rtol, atol=atol):
+                    set2_on_lambda[val1][val2] = 1
+                if set1_on_lambda[val1][val2] and set2_on_lambda[val1][val2]:
+                    break
+            #checking if our terms are zero
+            if np.isclose(np.linalg.norm(set1[val1][val2][1]),0.0, rtol=rtol, atol=atol):
+                set1_on_zero[val1][val2]=1
+            if np.isclose(np.linalg.norm(set2[val1][val2][1]),0.0, rtol=rtol, atol=atol):
+                set2_on_zero[val1][val2]=1
+                
     for M1 in range(0, data.shape[0]):
         for M2 in range(0, data.shape[0]):
-            #checking if our first term is on lambda (to avoid lambdaX{0})
-            on_lambda = False
-            for x in data:
-                if np.isclose(np.linalg.norm(x-set1[M1][M2][0]),0.0):
-                    on_lambda = True
-
             for M_phi1 in range(0, data.shape[0]):
                 for M_phi2 in range(0, data.shape[0]):
-                    #ignore lambdaX{0} as per the paper
-                    '''
-                    if np.isclose(np.linalg.norm(set2[M_phi1][M_phi2][1]),0.0) and np.isclose(np.linalg.norm(set1[M1][M2][0]), 1.0):
-                        distances[M1][M2][M_phi1][M_phi2] = np.inf
-                    '''
                     #checking if second term is approximately zero (to avoid lambdaX{0}
-                    if on_lambda:
-                        if np.isclose(np.linalg.norm(set2[M_phi1][M_phi2][1]),0.0):
-                            distances[M1][M2][M_phi1][M_phi2] = np.inf
-                        #otherwise find the distance as usual
-                        else:
-                            distances[M1][M2][M_phi1][M_phi2] = np.linalg.norm(set1[M1][M2]-set2[M_phi1][M_phi2])
-                    #otherwise find the distance
+                    if (set1_on_lambda[M1][M2] and set1_on_zero[M1][M2]) or (set2_on_lambda[M_phi1][M_phi2] and set2_on_zero[M_phi1][M_phi2]):
+                        distances[M1][M2][M_phi1][M_phi2] = np.inf
+                    #otherwise find the distance as usual
                     else:
                         distances[M1][M2][M_phi1][M_phi2] = np.linalg.norm(set1[M1][M2]-set2[M_phi1][M_phi2])
                             
@@ -168,23 +181,9 @@ print(min_val_loc_L)
 
 print("")
 
-print("Verifying not on LambdaX{0}...")
-test1 = False
-test2 = False
-for x in data:
-    if np.isclose(np.linalg.norm(x-L[min_val_loc_L[0][0]][min_val_loc_L[1][0]][0]),0.0):
-        print("   Found first term on Lambda...")
-        test1 = True
-if np.isclose(np.linalg.norm(L[min_val_loc_L[0][0]][min_val_loc_L[1][0]][1]), 0.0):
-    print("   Second term is near 0...")
-    test2 = True
-if not(test1 and test2):
-    print("   Verification passed...")
-
-
 L_intersection = copy.deepcopy(L[min_val_loc_L[0][0]][min_val_loc_L[1][0]])
 
-L_solutions = np.array([L_intersection[0]+L_intersection[1], L_intersection[0]-L_intersection[1], L_intersection[0]+add_phi(L_intersection[1], phi), L_intersection[0]-add_phi(L_intersection[1], phi)])
+L_solutions = np.array([L_intersection[0]+L_intersection[1], L_intersection[0]-L_intersection[1], L_intersection[0]+add_phi(L_intersection[1], -phi), L_intersection[0]-add_phi(L_intersection[1], -phi)])
 print("Estimated intersection of L and L_phi: {}+{}i and {}+{}i".format(*np.concatenate((L_intersection[0], L_intersection[1]))))
 print("Rectangle vertices from from L intersection")
 print("   {}\n   {}\n   {}\n   {}".format(*L_solutions))
@@ -194,9 +193,9 @@ print("   {}\n   {}\n   {}\n   {}".format(*L_solutions))
 #End Proof Implementation#
 ##########################
 
-######################################
-#Graphs of different defined elements#
-######################################
+#################
+#Graph of result#
+#################
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -262,9 +261,3 @@ ax[1][1].plot(L_phi[:,1][:,0],L_phi[:,1][:,1])
 ax[1][1].set_title("Second l(LambdaXLambda) Output")
 plt.show()
 '''
-
-
-################################
-#End graphs of defined elements#
-################################
-
