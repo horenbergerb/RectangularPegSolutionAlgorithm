@@ -2,3 +2,8 @@ This is an implementation of the impressive new solution to the Rectangular Peg 
 The implementation itself is not very impressive.
 See here for the original paper: #https://arxiv.org/pdf/2005.09193.pdf
 I'm going to try and apply this to more interesting curves next.
+
+NOTE:
+This should work for curves in general,
+however...
+The granularity of curve samples can be problematic if the distance is too wide, then solutions which are in lambdaX{0} won't be detected as such, because the nearest lambda sample will be too far away.

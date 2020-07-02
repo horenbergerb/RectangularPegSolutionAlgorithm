@@ -15,14 +15,14 @@ from scipy import constants
 
 #The interval between samples on our curve
 #I recommend only changing the denominator
-precision = (2.0*constants.pi)/30
+precision = (2.0*constants.pi)/40
 
 #picking a phi
 phi = 3.14159/2.0
 
 #Creating data for a simple circle (Jordan curve) to try and algorithmically solve for a rectangle inscription
 def curve_data():
-    curve = np.array([np.array([np.sin(i),np.cos(i)]) for i in np.arange(-3.14159,3.14159, precision)])
+    curve = np.array([np.array([3*np.sin(i),np.cos(i)]) for i in np.arange(-3.14159,3.14159, precision)])
     return curve
 
 #Coordinate conversion functions which take [x,y] and [mag,angle]
@@ -125,14 +125,30 @@ def find_intersection_point(set1, set2):
     #finding all the distances between points on M and points on M_phi
     for M1 in range(0, data.shape[0]):
         for M2 in range(0, data.shape[0]):
+            #checking if our first term is on lambda (to avoid lambdaX{0})
+            on_lambda = False
+            for x in data:
+                if np.isclose(np.linalg.norm(x-set1[M1][M2][0]),0.0):
+                    on_lambda = True
+
             for M_phi1 in range(0, data.shape[0]):
                 for M_phi2 in range(0, data.shape[0]):
                     #ignore lambdaX{0} as per the paper
+                    '''
                     if np.isclose(np.linalg.norm(set2[M_phi1][M_phi2][1]),0.0) and np.isclose(np.linalg.norm(set1[M1][M2][0]), 1.0):
                         distances[M1][M2][M_phi1][M_phi2] = np.inf
+                    '''
+                    #checking if second term is approximately zero (to avoid lambdaX{0}
+                    if on_lambda:
+                        if np.isclose(np.linalg.norm(set2[M_phi1][M_phi2][1]),0.0):
+                            distances[M1][M2][M_phi1][M_phi2] = np.inf
+                        #otherwise find the distance as usual
+                        else:
+                            distances[M1][M2][M_phi1][M_phi2] = np.linalg.norm(set1[M1][M2]-set2[M_phi1][M_phi2])
                     #otherwise find the distance
                     else:
                         distances[M1][M2][M_phi1][M_phi2] = np.linalg.norm(set1[M1][M2]-set2[M_phi1][M_phi2])
+                            
     print("   Finding minimum distance...")
     #getting minimum distance
     dist_min = np.nanmin(distances)
@@ -140,24 +156,7 @@ def find_intersection_point(set1, set2):
     print("   Minimum distance: {}".format(dist_min))
     return min_val_loc
 
-#Solving the M and M_phi approach
-print("Finding intersection point between M and M_phi points...")
-min_val_loc = find_intersection_point(M, M_phi)
-print("Minimum distance point in M:")
-print(M[min_val_loc[0][0]][min_val_loc[1][0]])
-print("Minimum distance point in M_phi:")
-print(M_phi[min_val_loc[2][0]][min_val_loc[3][0]])
-print("Minimum distance indices:")
-print(min_val_loc)
-
-M_intersection = copy.deepcopy(M[min_val_loc[0][0]][min_val_loc[1][0]])
-
-M_solutions = np.array([M_intersection[0]+M_intersection[1], M_intersection[0]-M_intersection[1], M_intersection[0]+add_phi(M_intersection[1], phi), M_intersection[0]-add_phi(M_intersection[1], phi)])
-print("Estimated intersection of M and M_phi: {}+{}i and {}+{}i".format(*np.concatenate((M_intersection[0], M_intersection[1]))))
-print("Rectangle vertices from from M intersection")
-print("   {}\n   {}\n   {}\n   {}".format(*M_solutions))
-
-#Solving the L and L_phi approach for posterity
+#Solving the L and L_phi approach
 print("Finding intersection point between L and L_phi points...")
 min_val_loc_L = find_intersection_point(L, L_phi)
 print("Minimum distance point in L:")
@@ -167,7 +166,23 @@ print(L_phi[min_val_loc_L[2][0]][min_val_loc_L[3][0]])
 print("Minimum distance indices:")
 print(min_val_loc_L)
 
-L_intersection = copy.deepcopy(L[min_val_loc[0][0]][min_val_loc[1][0]])
+print("")
+
+print("Verifying not on LambdaX{0}...")
+test1 = False
+test2 = False
+for x in data:
+    if np.isclose(np.linalg.norm(x-L[min_val_loc_L[0][0]][min_val_loc_L[1][0]][0]),0.0):
+        print("   Found first term on Lambda...")
+        test1 = True
+if np.isclose(np.linalg.norm(L[min_val_loc_L[0][0]][min_val_loc_L[1][0]][1]), 0.0):
+    print("   Second term is near 0...")
+    test2 = True
+if not(test1 and test2):
+    print("   Verification passed...")
+
+
+L_intersection = copy.deepcopy(L[min_val_loc_L[0][0]][min_val_loc_L[1][0]])
 
 L_solutions = np.array([L_intersection[0]+L_intersection[1], L_intersection[0]-L_intersection[1], L_intersection[0]+add_phi(L_intersection[1], phi), L_intersection[0]-add_phi(L_intersection[1], phi)])
 print("Estimated intersection of L and L_phi: {}+{}i and {}+{}i".format(*np.concatenate((L_intersection[0], L_intersection[1]))))
@@ -183,29 +198,18 @@ print("   {}\n   {}\n   {}\n   {}".format(*L_solutions))
 #Graphs of different defined elements#
 ######################################
 
-fig, ax= plt.subplots(1,2)
-
+fig = plt.figure()
+ax = fig.add_subplot(111)
 #Graphing solution from L and L_phi
 #Lambda and solution points:
 #plotting lambda
-ax[0].set_title("L and L_phi Solution")
-ax[0].plot(data[:,0], data[:,1])
+ax.set_title("L and L_phi Solution")
+ax.plot(data[:,0], data[:,1])
 #plotting the values for the intersection of L and L_phi
-ax[0].scatter(L_intersection[:,0], L_intersection[:,1], color='red')
+ax.scatter(L_intersection[:,0], L_intersection[:,1], color='red')
 #plotting solution points
-ax[0].scatter(L_solutions[:,0], L_solutions[:,1])
-ax[0].set_aspect('equal')
-
-#Graphing solution from M and M_phi
-#Lambda and solution points:
-#plotting lambda
-ax[1].set_title("M and M_phi Solution")
-ax[1].plot(data[:,0], data[:,1])
-#plotting the values for the intersection of M and M_phi
-ax[1].scatter(M_intersection[:,0], M_intersection[:,1], color='red')
-#plotting solution points
-ax[1].scatter(M_solutions[:,0], M_solutions[:,1])
-ax[1].set_aspect('equal')
+ax.scatter(L_solutions[:,0], L_solutions[:,1])
+ax.set_aspect('equal')
 
 plt.show()
 
