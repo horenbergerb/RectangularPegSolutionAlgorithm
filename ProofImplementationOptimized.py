@@ -55,8 +55,13 @@ print("We're going to solve the points on the curve with the diagonal of angle p
 
 #Jordan curve data
 print("Preparing Jordan curve data...")
-data = curve_data()
-
+data = None
+try:
+    data = np.loadtxt("customshape.txt")
+    print("Loaded curve from customshape.txt")
+except:
+    print("Failed to load custom curve; using mathematically generated curve")
+    data = curve_data()
 ############################
 #Begin Proof Implementation#
 ############################
@@ -64,7 +69,7 @@ data = curve_data()
 #So the first thing is the definition of these l and g functions
 #warning: must input in cartesian coords
 def l(z,w):
-    return np.array([(z.copy()+w.copy())/2.0, (z.copy()-w.copy())/2.0])
+    return np.concatenate(((z.copy()+w.copy())/2.0, (z.copy()-w.copy())/2.0))
     
 #warning: must input in cartesian coords
 #we convert to polar inside
@@ -73,7 +78,7 @@ def g(z,w):
     w[0] = w[0]/np.sqrt(2.0)
     w[1] = w[1]*2.0
     w = to_cartesian(w)
-    return np.array([z, w])
+    return np.array(np.concatenate((z, w)))
 
 print("Preparing lambdaXlambda...")
 #Defining lambdaXlambda
@@ -82,107 +87,165 @@ lambda_cross_lambda = np.zeros((data.shape[0], data.shape[0], 2,2))
 for cur1 in range(0, data.shape[0]):
     for cur2 in range(0, data.shape[0]):
         lambda_cross_lambda[cur1][cur2] = np.array([copy.deepcopy(data[cur1]),copy.deepcopy(data[cur2])])
+#flattening into 4 vectors rather than 2 complex numbers
+lambda_cross_lambda = np.reshape(lambda_cross_lambda, (lambda_cross_lambda.shape[0]*lambda_cross_lambda.shape[1], lambda_cross_lambda.shape[2]*lambda_cross_lambda.shape[3]))
 
 print("Preparing L...")
 #L as defined in the paper. we plug lambdaXlambda into l
 L = copy.deepcopy(lambda_cross_lambda)
-for cur1 in range(0, data.shape[0]):
-    for cur2 in range(0, data.shape[0]):
-        #i use the splat operator, *, to unpack the list as arguments
-        L[cur1][cur2] = l(*L[cur1][cur2])
+for cur1 in range(0, L.shape[0]):
+    L[cur1] = l(L[cur1][0:2], L[cur1][2:])
 
 #defining R_phi as in the paper
 def R_phi(phi, z, w):
     w = to_polar(w)
     w[1] = w[1]+phi
     w = to_cartesian(w)
-    return np.array([z, w])
+    return np.concatenate((z, w))
 
 print("Preparing L_phi...")
 #creating L_phi as in the paper
 L_phi = copy.deepcopy(L)
 for cur1 in range(0, L_phi.shape[0]):
-    for cur2 in range(0, L_phi.shape[1]):
-        L_phi[cur1][cur2] = R_phi(phi, *L_phi[cur1][cur2])
+    L_phi[cur1] = R_phi(phi, L_phi[cur1][0:2], L_phi[cur1][2:])
 
 print("Preparing M...")
 #creating M as in the paper
 M = copy.deepcopy(L)
 for cur1 in range(0, L.shape[0]):
-    for cur2 in range(0, L.shape[1]):
-        M[cur1][cur2] = g(*M[cur1][cur2])
+    M[cur1] = g(M[cur1][0:2], M[cur1][2:])
 
 print("Preparing M_phi...")
 #creating M_phi as in the paper
 M_phi = copy.deepcopy(L_phi)
 for cur1 in range(0, L_phi.shape[0]):
-    for cur2 in range(0, L_phi.shape[1]):
-        #observe we are using L_phi in this loop
-        M_phi[cur1][cur2] = g(*M_phi[cur1][cur2])
+    #observe we are using L_phi in this loop
+    M_phi[cur1] = g(M_phi[cur1][0:2], M_phi[cur1][2:])
 
-#QUESTION: do we need to define the tangent spaces, T_p(L) and T_p(L_phi)
-
-#According to the proof, we're done if we calculate
-#the intersection points of M and M_phi or L and L_phi
-#but this is an inefficient approximation can we use the intermediate proofs to speed it up?
-def find_intersection_point(set1, set2):
-    #tensor set1 and set2 but with scalar norms instead of 2 complex values as entries
-    distances = np.zeros((set1.shape[0], set1.shape[1], set2.shape[0], set2.shape[1]))
-    print("   Finding distances between all points")
-    #preemptively finding points in set1 and set2 which are on lambda and zero:
-    #finding all the distances between points on M and points on M_phi
-    set1_on_lambda = np.array([[0]*data.shape[0]]*data.shape[0])
-    set1_on_zero = np.array([[0]*data.shape[0]]*data.shape[0])
-    set2_on_lambda = np.array([[0]*data.shape[0]]*data.shape[0])
-    set2_on_zero = np.array([[0]*data.shape[0]]*data.shape[0])
-    for val1 in range(0, data.shape[0]):
-        for val2 in range(0, data.shape[0]):
-            #checking if our terms are lambda (to avoid lambdaX{0})
-            for x in data:
-                if np.isclose(np.linalg.norm(x-set1[val1][val2][0]),0.0, rtol=rtol, atol=atol):
-                    set1_on_lambda[val1][val2] = 1
-                if np.isclose(np.linalg.norm(x-set2[val1][val2][0]),0.0, rtol=rtol, atol=atol):
-                    set2_on_lambda[val1][val2] = 1
-                if set1_on_lambda[val1][val2] and set2_on_lambda[val1][val2]:
-                    break
-            #checking if our terms are zero
-            if np.isclose(np.linalg.norm(set1[val1][val2][1]),0.0, rtol=rtol, atol=atol):
-                set1_on_zero[val1][val2]=1
-            if np.isclose(np.linalg.norm(set2[val1][val2][1]),0.0, rtol=rtol, atol=atol):
-                set2_on_zero[val1][val2]=1
-                
-    for M1 in range(0, data.shape[0]):
-        for M2 in range(0, data.shape[0]):
-            for M_phi1 in range(0, data.shape[0]):
-                for M_phi2 in range(0, data.shape[0]):
-                    #checking if second term is approximately zero (to avoid lambdaX{0}
-                    if (set1_on_lambda[M1][M2] and set1_on_zero[M1][M2]) or (set2_on_lambda[M_phi1][M_phi2] and set2_on_zero[M_phi1][M_phi2]):
-                        distances[M1][M2][M_phi1][M_phi2] = np.inf
-                    #otherwise find the distance as usual
-                    else:
-                        distances[M1][M2][M_phi1][M_phi2] = np.linalg.norm(set1[M1][M2]-set2[M_phi1][M_phi2])
-                            
-    print("   Finding minimum distance...")
+#since we can't pick a solution whose first term is on lambda and
+#whose second term is zero, we classify all of our terms
+#WARNING: set1 must be sorted before this
+def find_lambda_or_zero(set1):
+    set1_on_lambda = np.array([False]*set1.shape[0])
+    set1_on_zero = np.array([False]*set1.shape[0])
+    for set1_cur in range(set1.shape[0]):
+        #checking if points are on lambda
+        for x in data:
+            if np.isclose(np.linalg.norm(x-set1[set1_cur][0:2]),0.0, rtol=rtol, atol=atol):
+                set1_on_lambda[set1_cur] = True
+            if set1_on_lambda[set1_cur]:
+                break
+        #checking if points are zero
+        if np.isclose(np.linalg.norm(set1[set1_cur][2:]),0.0, rtol=rtol, atol=atol):
+            set1_on_zero[set1_cur] = True
+    return np.array([set1_on_lambda, set1_on_zero])
+    
+#helper function for the next function
+#finds minimum qualifying distance between points of set1 and points of set2
+def find_min_dist(set1, set2):
+    #if we're at the base level, then we have either a left or right side and simply find our
+    #minimum qualifying distance
+    distances = np.zeros((set1.shape[0], set2.shape[0]))
+    set1_on_lambda = np.array([0]*set1.shape[0])
+    set2_on_lambda = np.array([0]*set2.shape[0])
+    set1_on_zero = np.array([0]*set1.shape[0])
+    set2_on_zero = np.array([0]*set2.shape[0])                
+    for set1_cur in range(0, set1.shape[0]):
+        for set2_cur in range(0, set2.shape[0]):
+            distances[set1_cur][set2_cur] = np.linalg.norm(set1[set1_cur]-set2[set2_cur])
     #getting minimum distance
     dist_min = np.nanmin(distances)
     min_val_loc = np.where(distances == dist_min)
-    print("   Minimum distance: {}".format(dist_min))
-    return min_val_loc
+    return [dist_min, set1[min_val_loc[0]], set2[min_val_loc[1]]]
+
+#According to the proof, we're done if we calculate
+#the intersection points of L and L_phi
+#the method here is recursive
+#WARNING: sort set1 and set2 before feeding to this method
+def find_intersection_point(set1, set2):
+    #finding the middle x value among all available points
+    master_list = np.zeros((set1.shape[0]+set2.shape[0],4))
+    set1_counter = 0
+    set2_counter = 0
+    master_counter = 0
+    #shuffling together our two sorted arrays
+    while(set1_counter < set1.shape[0] or set2_counter < set2.shape[0]):
+        if set1_counter == set1.shape[0]:
+            master_list[master_counter] = set2[set2_counter]
+            master_counter += 1
+            set2_counter += 1
+            continue
+        if set2_counter == set2.shape[0]:
+            master_list[master_counter] = set1[set1_counter]
+            master_counter += 1
+            set1_counter += 1
+            continue
+        if set1[set1_counter][0] <= set2[set2_counter][0]:
+            master_list[master_counter] = set1[set1_counter]
+            set1_counter += 1
+        else:
+            master_list[master_counter] = set2[set2_counter]
+            set2_counter += 1
+        master_counter += 1
+        
+    #the coordinate value of x that partitions our sets
+    partition_x = master_list[master_list.shape[0]/2][0]
+    #getting the index values that partition our sets
+    set1_partition = 0
+    set2_partition = 0
+    for cur in range(0, set1.shape[0]):
+        if all(x > partition_x for x in [set1[cur][0], set2[cur][0]]):
+            break
+        else:
+            if set1[cur][0] < partition_x:
+                set1_partition += 1
+            if set2[cur][0] < partition_x:
+                set2_partition += 1
+    #recursive part: if our partitions are not trivial, pass them into find_intersection_point
+    #gets the minimum distance points on the left and right sides
+    if set1_partition > 0 or set2_partition > 0:
+        results = []
+        #left side
+        results.append(find_intersection_point(set1[0:set1_partition],set2[0:set2_partition]))
+        #right side
+        results.append(find_intersection_point(set1[set1_partition:], set2[set2_partition:]))
+        #the two kinds of crossover possible
+        results.append(find_min_dist(set1[0:set1_partition], set2[set2_partition:]))
+        results.append(find_min_dist(set1[set1_partition:], set2[0:set2_partition]))
+        #picking the minimum distance
+        return min(results, key=lambda x: x[0])
+        
+    else:
+        #if we're at the base level, then we have either a left or right side and simply find our
+        #minimum qualifying distance
+        return find_min_dist(set1, set2)
+
+
 
 #Solving the L and L_phi approach
 print("Finding intersection point between L and L_phi points...")
-min_val_loc_L = find_intersection_point(L, L_phi)
-print("Minimum distance point in L:")
-print(L[min_val_loc_L[0][0]][min_val_loc_L[1][0]])
-print("Minimum distance point in L_phi:")
-print(L_phi[min_val_loc_L[2][0]][min_val_loc_L[3][0]])
-print("Minimum distance indices:")
-print(min_val_loc_L)
+#####################################
+#I'm working here and in the find_intersection_point function
+#Reference: https://softwareengineering.stackexchange.com/questions/306063/how-to-generalize-the-planar-case-of-the-closest-pair-problem-to-d-dimensions
+#####################################
 
-print("")
+#Sorting before we pass to find_intersection_point
+L = L[L[:,0].argsort()]
+L_phi = L_phi[L_phi[:,0].argsort()]
+#this checks all the values of L to see if they are valid
+#print(L)
+lambda_zero = np.invert(find_lambda_or_zero(L))
+#print(lambda_zero)
+lambda_zero = np.logical_and(lambda_zero[0], lambda_zero[1])
+#print(lambda_zero)
+L = L[lambda_zero]
+L_phi = L_phi[lambda_zero]
 
-L_intersection = copy.deepcopy(L[min_val_loc_L[0][0]][min_val_loc_L[1][0]])
+intersection_pt = find_intersection_point(L, L_phi)
+print(intersection_pt)
 
+L_intersection = np.array([np.array(intersection_pt[1][0][0:2]), np.array(intersection_pt[1][0][2:])])
+print(L_intersection)
 L_solutions = np.array([L_intersection[0]+L_intersection[1], L_intersection[0]-L_intersection[1], L_intersection[0]+add_phi(L_intersection[1], -phi), L_intersection[0]-add_phi(L_intersection[1], -phi)])
 print("Estimated intersection of L and L_phi: {}+{}i and {}+{}i".format(*np.concatenate((L_intersection[0], L_intersection[1]))))
 print("Rectangle vertices from from L intersection")

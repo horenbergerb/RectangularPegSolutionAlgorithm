@@ -16,7 +16,7 @@ from scipy import constants
 pi = constants.pi
 
 #The interval between samples on our curve
-curve_intervals = .07e-1
+curve_intervals = 1.0e-1
 
 #margin for checking whether solutions are on lambdaX{0}
 #can sometimes be tweaked to fix results instead of curve_interval
@@ -123,18 +123,11 @@ for cur1 in range(0, L_phi.shape[0]):
 #QUESTION: do we need to define the tangent spaces, T_p(L) and T_p(L_phi)
 
 #According to the proof, we're done if we calculate
-#the intersection points of M and M_phi or L and L_phi
-#but this is an inefficient approximation can we use the intermediate proofs to speed it up?
+#the intersection points of L and L_phi
+#the method here is recursive
+#WARNING: sort set1 and set2 before feeding to this method
 def find_intersection_point(set1, set2):
-    #tensor set1 and set2 but with scalar norms instead of 2 complex values as entries
-    distances = np.zeros((set1.shape[0], set1.shape[1], set2.shape[0], set2.shape[1]))
-    print("   Finding distances between all points")
-    #preemptively finding points in set1 and set2 which are on lambda and zero:
-    #finding all the distances between points on M and points on M_phi
-    set1_on_lambda = np.array([[0]*data.shape[0]]*data.shape[0])
-    set1_on_zero = np.array([[0]*data.shape[0]]*data.shape[0])
-    set2_on_lambda = np.array([[0]*data.shape[0]]*data.shape[0])
-    set2_on_zero = np.array([[0]*data.shape[0]]*data.shape[0])
+    '''
     for val1 in range(0, data.shape[0]):
         for val2 in range(0, data.shape[0]):
             #checking if our terms are lambda (to avoid lambdaX{0})
@@ -168,9 +161,19 @@ def find_intersection_point(set1, set2):
     min_val_loc = np.where(distances == dist_min)
     print("   Minimum distance: {}".format(dist_min))
     return min_val_loc
+    '''
 
 #Solving the L and L_phi approach
 print("Finding intersection point between L and L_phi points...")
+#####################################
+#I'm working here and in the find_intersection_point function
+#Reference: https://softwareengineering.stackexchange.com/questions/306063/how-to-generalize-the-planar-case-of-the-closest-pair-problem-to-d-dimensions
+#####################################
+#Sorting before we pass to find_intersection_point
+#L_test = L[np.argsort(L[:,0][0][0][0])]
+print(L)
+print("SCOOP DOOP")
+exit
 min_val_loc_L = find_intersection_point(L, L_phi)
 print("Minimum distance point in L:")
 print(L[min_val_loc_L[0][0]][min_val_loc_L[1][0]])
