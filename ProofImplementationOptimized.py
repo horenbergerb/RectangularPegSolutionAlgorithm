@@ -273,6 +273,7 @@ ax.scatter(L_intersection[:,0], L_intersection[:,1], color='red')
 ax.scatter(L_solutions[:,0], L_solutions[:,1])
 ax.set_aspect('equal')
 
+plt.savefig("curvewithrectangle.png")
 plt.show()
 
 

@@ -55,7 +55,13 @@ print("We're going to solve the points on the curve with the diagonal of angle p
 
 #Jordan curve data
 print("Preparing Jordan curve data...")
-data = curve_data()
+data = None
+try:
+    data = np.loadtxt("customshape.txt")
+    print("Loaded curve from customshape.txt")
+except:
+    print("Failed to load custom curve; using mathematically generated curve")
+    data = curve_data()
 
 ############################
 #Begin Proof Implementation#
@@ -210,6 +216,7 @@ ax.scatter(L_intersection[:,0], L_intersection[:,1], color='red')
 ax.scatter(L_solutions[:,0], L_solutions[:,1])
 ax.set_aspect('equal')
 
+plt.savefig("curvewithrectangle.png")
 plt.show()
 
 
