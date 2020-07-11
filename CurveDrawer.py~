@@ -1,6 +1,0 @@
-import tkinter as tk
-
-#The whole point here is basically to let you draw curves that you can plug into the program
-#I'm gonna make it so this outputs a file and you can pipe that to the other program somehow
-
-window = tk.Tk()
