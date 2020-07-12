@@ -8,18 +8,9 @@ import copy
 ##########
 #Overview#
 ##########
-
-#This is an implementation of some concepts used in Vaughan's Theorem, an earlier similar proof.
-#Particularly, Vaughan embeds all pairs of points on a curve into 3D space by considering the line segment connecting pairs. The coordinates (x,y,z) of the 3D point corresponding to a pair of points is determined as follows: (x,y) is the midpoint of the line segment between the two points, and (z) is the length of the line segment.
-
-#There is a few reasons Vaughan found this useful
-#Firstly, he knew that if this 3D surface intersected itself, that would mean two sets of points would have line segements sharing the same midpoint and the same lengths.That's equivalent to finding a rectangle!
-#He knew the sets of points had the topology of a mobius strip, and a similar topology, the real projective plane, necessarily intersects itself when embedded in 3-space
-#So our embedded figure (what we graph here) is a mobius strip topology, and it "sits on top of" the original curve, which lies in the xy plane. Then one "fills in" the hole within the curve on the xy plane, and the resulting object is topologically equivalent to the projective plane, which must necessarily intersect itself whenever it's embedded in 3D space. And since the intersection isn't on our boring xy plane, the intersection was caused by pairs of points!
-
-#our precision when finding the self-intersections of our embedded surface
-rtol = 1e-5
-atol = 8e-2
+#no way am i summarizing this again
+#i did a writeup in the Readme file found in the same folder
+#go read that
 
 #####################
 #Data initialization#
@@ -63,6 +54,10 @@ embedded_pts = np.array(embedded_pts)
 #it's also computationally expensive thus the multithreading
 
 '''
+#our precision when finding the self-intersections of our embedded surface
+rtol = 1e-5
+atol = 8e-2
+
 print("Searching for possible self-intersections...")
 print("   Checking {} points...".format(embedded_pts.shape[0]**2))
 intersect_pts = []
@@ -94,6 +89,7 @@ for result in results:
     intersect_pts += result
 intersect_pts = np.array(intersect_pts)
 '''
+
 ##################
 #Plotting results#
 ##################
