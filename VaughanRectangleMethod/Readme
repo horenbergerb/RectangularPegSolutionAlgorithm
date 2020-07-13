@@ -38,6 +38,15 @@ Here's how to use it:
 Parameters you can play with:
 'res' in the CurveDrawer.py details the distance between samples of your loop
 
+#####
+#FAQ#
+#####
+"The program throws an error like 'line 1842, in plot_wireframe
+    raise ValueError("Argument Z must be 2-dimensional.")
+    ValueError: Argument Z must be 2-dimensional.'"
+ This is due to your Python version. This code was written in 2.7.17
+
+
 #######
 #To Do#
 #######

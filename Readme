@@ -1,6 +1,8 @@
 ##########
 #Overview#
 ##########
+NOTE: This code is for Python 2.7.17 and Python 3.0 is known to cause problems for some files
+
 This is a collection of programs to implement and visualize methods used for finding rectangles in curves.
 It was written in response to a new paper with an astounding and complex proof of an easy-to-understand and hard-to-believe claim, which is essentially this:
 If you draw a smooth (no jagged bits) loop, and then pick a rectangle of some height:width proportion, you can find points on that loop which are the corners of a rectangle with the same proportion.
