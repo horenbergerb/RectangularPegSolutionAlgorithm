@@ -120,5 +120,5 @@ plt.tight_layout()
 print("   Animation initialization complete...")
 
 ani = animation.FuncAnimation(fig, update, sample_pts.shape[0], fargs=(pt1, pt2, L1, L2,), blit=False)
-ani.save('pairsandfirstlterm.gif', writer='imagemagick')
+ani.save('landlphisurfaces.mp4', writer='imagemagick')
 plt.show()

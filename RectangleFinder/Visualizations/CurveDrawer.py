@@ -5,7 +5,7 @@ import numpy as np
 #I'm gonna make it so this outputs a file and you can pipe that to the other program somehow
 
 #distance between mouse locations before we add another point to our array
-res = 7.0
+res = 6.0
 
 points = []
 cur_len = 0
