@@ -78,5 +78,5 @@ axs[0].set_aspect('equal')
 axs[1].set_aspect('equal')
 
 ani = animation.FuncAnimation(fig, update, 100, fargs=(pt1, pt2, out,), blit=False)
-ani.save('spinningloop.gif', writer='imagemagick')
+ani.save('pairsandfirstlterm.gif', writer='imagemagick')
 plt.show()

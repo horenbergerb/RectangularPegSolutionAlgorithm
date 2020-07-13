@@ -21,4 +21,5 @@ Let's start at the end and work backwards.
     We know the first term of l(p1,q1) is actually just the midpoint of p1 and q1. And the first term of R_phi(p2,r2,theta2) is just p2. So the midpoint of p1 and q1 must be p2.
       We're going to add and subtract a rotation of some point on the curve (the second term) in order to get the rectangle points on the curve
     So the second terms... We'll say, for simplicity, the 'anti-midpoint' of p1 and q1 must have the same magnitude as q2 and be rotated by exactly phi.
-  
+
+ ###Taking a break to try and animate the terms of l(z,w) wrt pairs of points on the curve
