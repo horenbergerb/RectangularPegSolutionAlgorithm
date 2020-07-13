@@ -1,0 +1,24 @@
+##########
+#Overview#
+##########
+
+So this file is for noodling with some thoughts I have on the theoretical mechanisms of this proof.
+
+##############################
+#Relations to Vaughan Methods#
+##############################
+*I assume you've read over everything in the Vaughan folder and have seen the code/paper for this folder.
+These spaced blobs are each disconnected thoughts for now
+
+So at the start, we see lambdaXlambda, which is the same funky mobius strip Vaughan started with. But Vaughan condensed the information by embedding it in R^3 using midpoints between pairs of points and distances between pairs of points. In this paper, we don't see any condensing of information, but we do see a similar molding of information.
+  Take, for example, the function l(z,w). This takes in the mobius strip, and the first term of the output is actually the midpoints, (z+w/2). What's the other term?
+
+Let's start at the end and work backwards.
+  Some output of l(lambdaXlambda) intersects R_phi(lambdaXlambda) at some point, (z, re^(i*(theta+phi))).
+    Because this point is on the intersection, it must be that z +- re^(i*(theta+phi)) and z +- re^(i*(theta)) all lie on the curve
+  We have to find two pair of points on the loop, (p1,q1) and (p2,q2) or (p2,r2,theta2) such that l(p1,q1)=R_phi(p2,r2,theta2).
+  What does this mean?
+    We know the first term of l(p1,q1) is actually just the midpoint of p1 and q1. And the first term of R_phi(p2,r2,theta2) is just p2. So the midpoint of p1 and q1 must be p2.
+      We're going to add and subtract a rotation of some point on the curve (the second term) in order to get the rectangle points on the curve
+    So the second terms... We'll say, for simplicity, the 'anti-midpoint' of p1 and q1 must have the same magnitude as q2 and be rotated by exactly phi.
+  

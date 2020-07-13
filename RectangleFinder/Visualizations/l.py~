@@ -1,0 +1,33 @@
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+from scipy.integrate import simps
+from scipy.integrate import quad
+import copy
+from matplotlib.colors import Normalize
+import matplotlib.cm as cm
+from scipy import constants 
+
+###################################
+#Utilities and data initialization#
+###################################
+
+#function-generated curve. used if a custom-drawn curve file isn't found
+def curve_data():
+    #An assortment of sample curves
+    #curve = np.array([np.array([np.sin(i),np.cos(i)]) for i in np.arange(0.0,2.0*pi, curve_intervals)])
+    #curve = np.array([np.array([3.0*np.sin(i),np.cos(i)]) for i in np.arange(0.0,2.0*pi, curve_intervals)])
+    curve = np.array([np.array([np.real((np.sin(2.0*i)+2.0)*np.exp(i*1j)),np.imag((np.sin(2.0*i)+2.0)*np.exp(i*1j))]) for i in np.arange(-0.0,2.0*pi, curve_intervals)])
+    return curve
+
+#Here we're actually trying to load up some data
+print("Hello! Phi is set in the code to {}".format(phi))
+print("Let's find that rectangle!")
+print("Preparing Jordan curve data...")
+data = None
+try:
+    data = np.loadtxt("customshape.txt")
+    print("   Loaded curve from customshape.txt")
+except:
+    print("   Failed to load custom curve; using mathematically generated curve")
+    data = curve_data()
