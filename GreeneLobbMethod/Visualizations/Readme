@@ -1,0 +1,35 @@
+##########
+#Overview#
+##########
+
+So I wanted to visualize some aspects of the actual theoretical process used in this proof.
+There are a number of things which could be visualized, so I've made a "master visualizer" and then a few independent visualizers just to help clarify things. I'll talk about the smaller visualizers here to get started.
+
+Most of these have parameters at the top of the code which you can play with.
+
+This is a WIP folder, so the documentation is not gonna be fantastic.
+
+#####################
+#LAndLPhiSurfaces.py#
+#####################
+
+  So the whole point of this proof is that pairs of points can be mapped to two funky surfaces, L and L_phi, and the intersection of these surfaces yields two points which can be used to construct the desired rectangle. But let's not get ahead of ourselves. L and L_phi are both calculated by mapping lambdaXlambda (pairs of points on the curve) to C^2. This is not something which can be conveniently visualized.
+
+  How do we get around this? We cheat! The animated part of this plot shows how the original curve maps to pairs of points in L and in L_phi. Additionally, you can see the surface covered by each of the separate terms. However, do not be deceived: a pair of points, say, term1 of L and term2 of L, is only in L if they have the same color on this plot. You cannot pick a point on the term1 surface and pair it with any point on the term2 surface!
+
+  I'd like to point out an immediate consequence of the way we've plotted this: you can see where the solution points lie in L and L_phi with your eyes! How? You must find a single coordinate for both term1 plots and another single coordinate for both term2 plots such that the colors of the specified point match in each row!
+
+
+######################
+#Master Visualizer.py#
+######################
+
+  This is a huge collection of plots which details the entire constructive process of our rectangle.
+
+  On row one we see two pairs of points. The first pair is used to determine the points of L, and the second pair is used to determine the points of L_phi. Keep in mind the path we've animated these on is totally arbitrary; I just picked a path that I thought would be illustrative.
+
+  Beyond this, we see L and L_phi, just like in the last program.
+
+  in the fourth row, we see two lines which demonstrate the distance between the first terms and the second terms, respectively, of L and L_phi.
+
+  in the fifth row, we see a plot which shows what would happen if we used the points of L to construct our rectangle and a plot which does the same for the points of L_phi. This will show the correct rectangle whenever the L and L_phi points are the same
