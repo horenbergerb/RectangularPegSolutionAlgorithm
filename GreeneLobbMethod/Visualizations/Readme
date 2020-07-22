@@ -9,6 +9,12 @@ Most of these have parameters at the top of the code which you can play with.
 
 This is a WIP folder, so the documentation is not gonna be fantastic.
 
+######
+#l.py#
+######
+
+This is trying to show what happens to the pairs of points on the loop when they're run through the l function. While this animation is nice, I think the next program sums up this process more completely. I'll probably remove this code soon.
+
 #####################
 #LAndLPhiSurfaces.py#
 #####################
@@ -21,7 +27,7 @@ This is a WIP folder, so the documentation is not gonna be fantastic.
 
 
 ######################
-#Master Visualizer.py#
+#MasterVisualizer.py#
 ######################
 
   This is a huge collection of plots which details the entire constructive process of our rectangle.
@@ -33,3 +39,10 @@ This is a WIP folder, so the documentation is not gonna be fantastic.
   in the fourth row, we see two lines which demonstrate the distance between the first terms and the second terms, respectively, of L and L_phi.
 
   in the fifth row, we see a plot which shows what would happen if we used the points of L to construct our rectangle and a plot which does the same for the points of L_phi. This will show the correct rectangle whenever the L and L_phi points are the same
+
+################################
+#MasterVisualizerInteractive.py#
+################################
+
+Same as previous, but this time I added sliders to wiggle the starting two pairs of points. Still has bugs (see to-do list in code), but I like the concept and I will probably finish it later. Pretty laggy, unfortunately.
+

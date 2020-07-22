@@ -21,3 +21,19 @@ In the RectangleFinder folder, you'll find an algorithmic implementation of the 
 So the proof implemented in the RectangleFinder folder is really complex. It's mapping four-dimensional things to other four-dimensional things. I thought one could get a good taste of the concepts by playing with other proofs about the existence of rectangles on loops.
 
 Vaughan used topological methods to show that some rectangle must exist on certain loops. These methods can be described and visualized with a little more ease. The code in this file lets you implement some of his methods on your own hand-drawn curves!
+
+#######
+#TO DO#
+#######
+
+I should have turned most of the functions I use into a package a long time ago
+  Then I could remove massive blocks of code from all my files
+  This is a really important to-do item
+  Could I turn some of the graphing procedures into a package as well?
+    Probably
+
+Fix up the interactive visualization in GreeneLobb/Visualizations
+  Update the Readme there to include this file and any other new files
+
+Clean up the Greene/Lobb/BlogTools file
+  Add a readme to give perspective on what these are for
